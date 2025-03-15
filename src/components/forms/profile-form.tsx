@@ -1,6 +1,6 @@
 'use client'
 
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -24,12 +24,13 @@ type Props = {
 
 const ProfileForm = ({ user, onUpdate }: Props) => {
   const [isLoading, setIsLoading] = useState(false)
+  // Initialize with empty strings or undefined values
   const form = useForm<z.infer<typeof EditUserProfileSchema>>({
     mode: 'onChange',
     resolver: zodResolver(EditUserProfileSchema),
     defaultValues: {
-      name: user.name,
-      email: user.email,
+      name: '',
+      email: '',
     },
   })
 
@@ -41,9 +42,18 @@ const ProfileForm = ({ user, onUpdate }: Props) => {
     setIsLoading(false)
   }
 
+  // Set form values only after component has mounted and when user data changes
   useEffect(() => {
-    form.reset({ name: user.name, email: user.email })
-  }, [user])
+    if (user && user.name !== undefined && user.email !== undefined) {
+      // Using setTimeout to ensure this happens after initial render
+      setTimeout(() => {
+        form.reset({ 
+          name: user.name || '', 
+          email: user.email || '' 
+        });
+      }, 0);
+    }
+  }, [form, user]);
 
   return (
     <Form {...form}>
